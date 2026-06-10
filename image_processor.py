@@ -12,7 +12,6 @@ class ImageProcessor:
         self.orientation_check()
         self.fix_angle()
         self.isolate_table()
-        self.debug_mode = DEBUG_MODE
         self.extract_cells()
         
         
