@@ -4,15 +4,15 @@ import numpy as np
 import math
 
 class ImageProcessor:
-    def __init__(self, path):
+    def __init__(self, path, DEBUG_MODE=False):
         self.path = path
-        self.debug_mode = False
+        self.debug_mode = DEBUG_MODE
         self.debug_print(f"{20*'-'} {path} {20*'-'}")
         self.load_scan()
         self.orientation_check()
         self.fix_angle()
         self.isolate_table()
-        self.debug_mode = True
+        self.debug_mode = DEBUG_MODE
         self.extract_cells()
         
         
@@ -215,8 +215,11 @@ class ImageProcessor:
                 canvas[y_offset : y_offset + new_h, x_offset : x_offset + new_w] = resized 
                 
                 new_w, new_h = int(w_crop * scale), int(h_crop * scale)
+                
+                return canvas
+                
     def get_cell_images(self):
-        cell_images = []
+        cell_images = {1:[], 2:[], 3:[]}
         
         for i, (x, y, w, h) in enumerate(self.final_cells):
             padding = -1
@@ -224,13 +227,13 @@ class ImageProcessor:
             cell_rescaled = cv2.resize(cell, None, fx=2.5, fy=2.5, interpolation=cv2.INTER_CUBIC)
             cell_rescaled = self.clean_cell(cell_rescaled)
             
-            canvas = self.prepare_data_for_cnn(cell_rescaled)            
-            self.debug_print(f"{i+1}")
-            if i == 5:
+            canvas = self.prepare_data_for_cnn(cell_rescaled)  
+            if i == 3:
                 self.save_debug("cell_rescaled", cell_rescaled)
                 if canvas is not None:
                     self.save_debug("cell_canvas", canvas)
                 
             if canvas is not None:
-                cell_images.append(canvas)
+                self.debug_print(f"{i}")
+                cell_images[i//60+1].append(canvas)
         return cell_images
