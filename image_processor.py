@@ -181,7 +181,7 @@ class ImageProcessor:
             isNumber=True
             for cnt in cell_contour:
                 cell_contour_area = cv2.contourArea(cnt)
-                if cell_contour_area > 150:
+                if cell_contour_area > 120:
                     contour_area_list.append(cell_contour_area)
                     contour_list.append(cnt)
                 
@@ -236,3 +236,23 @@ class ImageProcessor:
                 self.debug_print(f"{i}")
                 cell_images[i//60+1].append(canvas)
         return cell_images
+    
+    def get_cell_images_data_getter(self):
+        path = self.path[self.path.rfind('/')+1:-4]
+        data = []
+        for i, (x, y, w, h) in enumerate(self.final_cells):
+            padding = -1
+            cell = self.img[y-padding : y+h+padding, x-padding : x+w+padding]
+            cell_rescaled = cv2.resize(cell, None, fx=2.5, fy=2.5, interpolation=cv2.INTER_CUBIC)
+            cell_rescaled = self.clean_cell(cell_rescaled)
+            
+            canvas = self.prepare_data_for_cnn(cell_rescaled)  
+            if i == 3:
+                self.save_debug("cell_rescaled", cell_rescaled)
+                if canvas is not None:
+                    self.save_debug("cell_canvas", canvas)
+                
+            if canvas is not None:
+                self.debug_print(f"{path}, {i//60+1}, {i}")
+                data.append((canvas, path, i//60+1, i))
+        return data
