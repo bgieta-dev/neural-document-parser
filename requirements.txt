@@ -3,3 +3,9 @@ Pillow
 opencv-python
 pymupdf
 PyQt6
+torch
+torchvision 
+torchaudio 
+black
+onnx
+onnxruntime

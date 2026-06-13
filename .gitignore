@@ -10,7 +10,7 @@ venv/
 ENV/
 
 # Debug images and outputs
-debug/
+debug/*
 
 # OS specific
 .DS_Store
@@ -19,3 +19,6 @@ debug/
 
 # Configuration
 *.log
+
+*.pth
+preprocessed_data/*

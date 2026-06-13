@@ -1,11 +1,20 @@
 from image_processor import ImageProcessor
-from pathlib import Path     
+from pathlib import Path
 import numpy as np
 from PIL import Image
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
+from PyQt6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+)
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import Qt
 import sys
+
 
 class DataGetterGUI(QWidget):
     def __init__(self, imgs_data):
@@ -17,7 +26,7 @@ class DataGetterGUI(QWidget):
     def normalize_image(self, arr):
         """Basic normalization: ensure 0-255 uint8."""
         if arr.dtype == bool:
-            return (arr.astype(np.uint8) * 255)
+            return arr.astype(np.uint8) * 255
         if arr.max() <= 1:
             return (arr * 255).astype(np.uint8)
         return arr.astype(np.uint8)
@@ -30,12 +39,14 @@ class DataGetterGUI(QWidget):
             display_arr = self.normalize_image(arr)
             # Ensure memory is contiguous for Qt
             display_arr = np.ascontiguousarray(display_arr)
-            
+
             h, w = display_arr.shape
-            
+
             # Create QImage from raw data
-            q_img = QImage(display_arr.data, w, h, w, QImage.Format.Format_Grayscale8).copy()
-            
+            q_img = QImage(
+                display_arr.data, w, h, w, QImage.Format.Format_Grayscale8
+            ).copy()
+
             self.image_label.setPixmap(QPixmap.fromImage(q_img))
             self.info_label.setText(f"File: {fname} | Page: {page} | Cell: {idx}")
         else:
@@ -49,7 +60,9 @@ class DataGetterGUI(QWidget):
         self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image_label.setMinimumSize(400, 300)
         self.image_label.setScaledContents(True)
-        self.image_label.setStyleSheet("border: 1px solid black; background-color: white;")
+        self.image_label.setStyleSheet(
+            "border: 1px solid black; background-color: white;"
+        )
         layout.addWidget(self.image_label)
 
         self.info_label = QLabel(self)
@@ -63,7 +76,7 @@ class DataGetterGUI(QWidget):
         layout.addWidget(self.input_field)
 
         btn_layout = QHBoxLayout()
-        
+
         self.skip_button = QPushButton("Skip", self)
         self.skip_button.clicked.connect(self.on_skip_clicked)
         btn_layout.addWidget(self.skip_button)
@@ -75,7 +88,9 @@ class DataGetterGUI(QWidget):
 
         self.next_button = QPushButton("Next (Save)", self)
         self.next_button.clicked.connect(self.on_next_clicked)
-        self.next_button.setStyleSheet("font-weight: bold; background-color: #ccffcc; color: black;")
+        self.next_button.setStyleSheet(
+            "font-weight: bold; background-color: #ccffcc; color: black;"
+        )
         btn_layout.addWidget(self.next_button)
 
         layout.addLayout(btn_layout)
@@ -109,10 +124,10 @@ class DataGetterGUI(QWidget):
             if text:
                 output_dir = Path("preprocessed_data")
                 output_dir.mkdir(exist_ok=True)
-                
+
                 # Basic normalization for save
                 save_arr = self.normalize_image(arr)
-                
+
                 base_fname = Path(fname).stem
                 save_name = f"{base_fname}-{page}-{idx}-{text}.png"
                 Image.fromarray(save_arr).save(output_dir / save_name)
@@ -121,6 +136,7 @@ class DataGetterGUI(QWidget):
             self.input_field.clear()
             self.current_index += 1
             self.show_image()
+
 
 class DataGetter:
     def __init__(self, raw_dat_dir):
@@ -168,6 +184,7 @@ class DataGetter:
         window = DataGetterGUI(imgs_data=data)
         window.show()
         sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     DataGetter(raw_dat_dir="raw_data/")
