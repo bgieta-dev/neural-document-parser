@@ -44,13 +44,15 @@ class ImageProcessor:
             x, y, w, h = cv2.boundingRect(marker)
             aspect_ratio = float(w) / float(h)
 
-            is_square = 0.7 < aspect_ratio < 1.3
+            is_square = 0.8 < aspect_ratio < 1.2
             if is_square:
-                valid.append(marker)
-                M = cv2.moments(marker)
-                cX = int(M["m10"] / M["m00"])
-                cY = int(M["m01"] / M["m00"])
-                centers.append((cX, cY))
+                try:
+                    valid.append(marker)
+                    cX = x + w // 2
+                    cY = y + h // 2
+                    centers.append((cX, cY))
+                except:
+                    self.debug_print(f"[ERROR] in appending centers: ({cX}, {cY})")
         self.debug_print(centers)
         img = self.img.copy()
         cv2.drawContours(img, valid, -1, (0, 255, 0), 3)
@@ -77,15 +79,10 @@ class ImageProcessor:
         self.debug_print(f"{height}, {width}")
         self.height, self.width = height, width
         centers = self.get_centers_of_markers(self.get_contours(self.img))
-        top = 0
-        bottom = 0
-        for center in centers:
-            if center[1] > height / 2:
-                top += 1
-            else:
-                bottom += 1
-        self.debug_print(f"{top}, {bottom}")
-        if top > bottom:
+
+        middle_marker = min(centers, key=lambda c: abs(c[0] - width / 2))
+        self.debug_print(f"Middle marker: {middle_marker}")
+        if middle_marker[1] > self.height:
             self.debug_print("rotated2")
             self.img = cv2.rotate(self.img, cv2.ROTATE_180)
             self.save_debug("rotate2", self.img)
